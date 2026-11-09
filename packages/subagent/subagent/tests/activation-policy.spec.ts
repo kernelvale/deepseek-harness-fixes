@@ -220,10 +220,10 @@ describe('in-process policy inheritance', () => {
       expect(child.session.header.isSeeded).toBe(true)
       expect(child.session.inheritedEventCount).toBe(1)
       expect(child.session.firstLiveSeq).toBe(seed.length)
-      // seq 1 is the constructor's end-seed marker.
+      // The inherited marker and captured model selection precede the descriptor and policy.
       expect(child.session.snapshotEvents().filter(event => event.type === 'sandbox/mode')).toMatchObject([
         { seq: 0, data: { mode: 'workspace-write' } },
-        { seq: 3, data: { mode: 'read-only', source: 'delegation' } },
+        { seq: 4, data: { mode: 'read-only', source: 'delegation' } },
       ])
       await expect(readFile(blocked, 'utf8')).rejects.toMatchObject({ code: 'ENOENT' })
       expect(ctx.sandboxPolicy.overrideOf(child.session)).toBe('read-only')

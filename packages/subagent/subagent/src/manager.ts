@@ -826,6 +826,10 @@ export class SubagentManager {
           for (const message of [...child.inbox.nextStep, ...child.inbox.nextTurn]) {
             if (inheritedInputIds.has(message.id)) child.inbox.remove(message.id)
           }
+          const { provider, model, reasoningEffort } = inputs.agentOptions
+          if (provider !== undefined && model !== undefined) {
+            child.model.select({ provider, model, ...reasoningEffort === undefined ? {} : { reasoningEffort } })
+          }
         }
         // Only fresh creation appends the descriptor and delegated policy after
         // the inherited marker; a cold resume replays those persisted events.

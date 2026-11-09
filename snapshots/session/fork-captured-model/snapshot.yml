@@ -1,0 +1,11 @@
+version: 1
+scenario: fork-captured-model
+profile: headless
+composition: default
+recording: authored
+header:
+  class: fork-captured-model
+  pin: true
+  systemPromptSource: text-turn
+  toolSchemasSource: text-turn
+  childSystemPrompts: [1]

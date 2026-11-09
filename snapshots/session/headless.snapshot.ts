@@ -30,6 +30,7 @@ import {
   parseSnapshotManifest,
   parseSessionFixtureName,
   parseToolSchemasSnapshot,
+  parseSystemPromptSnapshot,
   redactSessionSnapshotIds,
   refreshFixtureReplacements,
   REPLAY_CREDENTIAL_ENV,
@@ -1035,6 +1036,7 @@ async function verifyHeaders(scenario: HeadlessScenario, actualLogs: readonly Se
 
   const childPrompts = new Map<number, string>()
   const childSchemas = new Map<number, unknown[][]>()
+  const fixtureLogs = await fixtureSessions(scenario)
   for (const index of scenario.manifest.header.childSystemPrompts ?? []) {
     childPrompts.set(index, await readFile(join(scenario.dir, `system-prompt.${index}.expected.md`), 'utf8'))
   }
@@ -1046,15 +1048,24 @@ async function verifyHeaders(scenario: HeadlessScenario, actualLogs: readonly Se
   for (const [logIndex, log] of actualLogs.entries()) {
     const headers = normalizedHeaders(log.content, ctx)
     const prompts = normalizedSystemPrompts(log.content, ctx)
+    const childFixture = logIndex === 0 ? undefined : fixtureLogs[logIndex]
+    const childHeaders = childFixture === undefined ? [] : normalizedHeaders(childFixture, fixtureContext(childFixture))
     if (headers.length > 0) {
       expect(systemPromptPrecedesRequests(log.content), `${scenario.name}: a system/message precedes the first request/header`).toBe(true)
+      const childPrompt = childPrompts.get(logIndex)
+      const promptChanges = logIndex === 0 ? pin.manifest.header.promptChanges ?? 0
+        : childPrompt === undefined ? 0 : parseSystemPromptSnapshot(childPrompt).changes.length
       expect(prompts.length, `${scenario.name}: system/message count`)
-        .toBe(1 + (logIndex === 0 ? pin.manifest.header.promptChanges ?? 0 : 0))
+        .toBe(1 + promptChanges)
     }
     for (const [index, header] of headers.entries()) {
       const selectedSchemas = childSchemas.get(logIndex)?.[index]
       const base = reconstructed[index] ?? reconstructed[0]
-      const expected = selectedSchemas === undefined ? base : { ...base as JsonObject, tools: selectedSchemas }
+      const expected = {
+        ...base as JsonObject,
+        ...logIndex === 0 ? {} : { config: (childHeaders[index] as JsonObject | undefined)?.config },
+        ...selectedSchemas === undefined ? {} : { tools: selectedSchemas },
+      }
       expect(header, `${scenario.name}: request header ${index + 1}`).toEqual(expected)
     }
     if (prompts.length > 0) {
