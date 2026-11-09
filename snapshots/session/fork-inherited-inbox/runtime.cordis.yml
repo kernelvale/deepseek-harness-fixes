@@ -1,0 +1,3 @@
+- insert:
+    - id: fork-inherited-inbox-driver
+      name: ./driver.mjs

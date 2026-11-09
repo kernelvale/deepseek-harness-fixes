@@ -818,6 +818,15 @@ export class SubagentManager {
       const { create, childId } = inputs
       let structured: StructuredAttachment | undefined
       const setup = async (childCtx: Context, child: Agent): Promise<void> => {
+        if (create?.seed !== undefined) {
+          const inheritedInputIds = new Set(create.seed.flatMap(event => event.type === 'agent/inbox/spliced'
+            ? event.data.inserted.map(message => message.id)
+            : []))
+          // A new delegation inherits conversation, not its creator's unclaimed work.
+          for (const message of [...child.inbox.nextStep, ...child.inbox.nextTurn]) {
+            if (inheritedInputIds.has(message.id)) child.inbox.remove(message.id)
+          }
+        }
         // Only fresh creation appends the descriptor and delegated policy after
         // the inherited marker; a cold resume replays those persisted events.
         if (inputs.composition.agentPreset !== undefined) {
