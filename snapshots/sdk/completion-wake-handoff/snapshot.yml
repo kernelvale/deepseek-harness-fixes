@@ -1,0 +1,7 @@
+version: 1
+scenario: completion-wake-handoff
+profile: sdk
+composition: sdk-upload
+recording: authored
+header:
+  class: sdk-upload

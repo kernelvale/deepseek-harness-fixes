@@ -1,0 +1,3 @@
+- insert:
+    - id: completion-wake-handoff-driver
+      name: ./driver.mjs

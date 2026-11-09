@@ -1,0 +1,7 @@
+version: 1
+scenario: completion-wake-handoff
+profile: headless
+composition: default
+recording: authored
+header:
+  class: default

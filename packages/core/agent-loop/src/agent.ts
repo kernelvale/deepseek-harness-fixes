@@ -58,7 +58,15 @@ type Phase =
     lastTurn: number
     wakeRequested: boolean
   }
-  | { kind: 'running'; abort: AbortController; turn: number; step: number; wakeRequested: boolean }
+  | {
+    kind: 'running'
+    abort: AbortController
+    turn: number
+    step: number
+    wakeRequested: boolean
+    /** The final successful inbox check has committed this driver to exit. */
+    finishing: boolean
+  }
 
 type StepEndReason = Extract<TurnEndReason, { kind: 'completed' | 'max-tokens' }>
 
@@ -193,6 +201,7 @@ export class ReactLoopAgent implements Agent {
       this.inbox.clear()
       if (this.phase.kind !== 'idle') this.phase.wakeRequested = false
     }
+    if (this.phase.kind === 'running' && this.phase.finishing) this.phase.wakeRequested = false
     if (this.phase.kind !== 'idle') this.phase.abort.abort(cause)
   }
 
@@ -229,11 +238,11 @@ export class ReactLoopAgent implements Agent {
    */
   private wakeDriver(wakeAfterAbort = false): void {
     if (this.phase.kind !== 'idle') {
-      // Maintenance and aborted drivers cannot deliver the wake: latch it for
-      // replay at convergence. Live drivers claim queued work themselves;
-      // disposal never latches, so teardown waits on no model turn.
+      // A finishing driver has already stopped checking its inbox. Cancellation
+      // keeps earlier queued work parked; disposal never admits another turn.
       const reason = abortedCancelCause(this.phase.abort.signal)
-      if (reason?.kind !== 'disposed' && (this.phase.kind === 'maintenance' || wakeAfterAbort)) {
+      if (reason?.kind !== 'disposed' && (this.phase.kind === 'maintenance' || wakeAfterAbort
+        || (this.phase.finishing && !this.phase.abort.signal.aborted))) {
         this.phase.wakeRequested = true
       }
       return
@@ -246,6 +255,7 @@ export class ReactLoopAgent implements Agent {
       turn: this.phase.lastTurn,
       step: 0,
       wakeRequested: false,
+      finishing: false,
     })
     this.loopCtx.agents.withInitiator(this, () => this.kick()).then(driver.resolve, driver.reject)
   }
@@ -355,6 +365,7 @@ export class ReactLoopAgent implements Agent {
           // still owns the initial turn boundary, but it spends no model call.
           if (phase.step === 0 && decision.messages.length === 0) {
             turnEnds = { kind: 'completed' }
+            phase.finishing = true
             return false
           }
           signal.throwIfAborted()
@@ -421,10 +432,14 @@ export class ReactLoopAgent implements Agent {
         // oxlint-disable-next-line typescript/no-non-null-assertion -- every exit assigns a turn ending
         this.session.append('turn/end', { turn, reason: turnEnds! })
       } catch (error: unknown) {
+        phase.finishing = false
         this.throwError(error)
       }
     }
-    if (!this.inbox.hasPending) return false
+    if (!this.inbox.hasPending) {
+      phase.finishing = true
+      return false
+    }
     phase.abort = new AbortController()
     // A fresh controller makes a latch set on the old one stale: the live driver claims the queue itself.
     phase.wakeRequested = false

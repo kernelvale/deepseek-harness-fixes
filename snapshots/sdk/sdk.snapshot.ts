@@ -140,6 +140,10 @@ interface SdkAssertions {
 }
 
 const SDK_ASSERTIONS: Readonly<Record<string, SdkAssertions>> = {
+  'completion-wake-handoff': {
+    expectedFinalResponse: 'FIRST_DONE',
+    patches: [fileURLToPath(new URL('./completion-wake-handoff/runtime.cordis.yml', import.meta.url))],
+  },
   'team-default-enabled': {
     expectedFinalResponse: 'TEAM_CONFIG_OK',
     patches: [
@@ -887,7 +891,7 @@ async function runScenario(scenario: CorpusScenario): Promise<{
       : undefined
     const expectedTitles = records(primaryFixture).filter(event => event.type === 'session/title'
       && ((event.data as JsonObject).source as JsonObject).kind === 'provider')
-    const completionSubscription = scenario.name === 'subagent-continuable'
+    const completionSubscription = scenario.name === 'subagent-continuable' || scenario.name === 'completion-wake-handoff'
       ? harness.client.subscribeSessionTree(sessionId)
       : undefined
     const observe = (notification: HarnessNotification): void => {
@@ -978,7 +982,20 @@ async function runScenario(scenario: CorpusScenario): Promise<{
             && ((event.data as JsonObject).source as JsonObject).kind === 'provider'
             && (event.data as JsonObject).title === expected?.title, observe)
         }
-        if (completionSubscription !== undefined) {
+        if (completionSubscription !== undefined && scenario.name === 'completion-wake-handoff') {
+          expect(result.finalResponse).toBe('FIRST_DONE')
+          expect(await harness.client.request('session/wait', { sessionId })).toEqual({})
+          const delivered: HarnessNotification[] = []
+          let message: HarnessNotification | undefined
+          while ((message = completionSubscription.tryNext()) !== undefined) delivered.push(message)
+          const endings = delivered.flatMap(message => {
+            const event = message.params.sessionId === sessionId ? notificationEvent(message) : undefined
+            return event?.type === 'turn/end' ? [(event.data as JsonObject).turn] : []
+          })
+          expect(endings).toEqual([1, 2])
+          notifications.splice(0, notifications.length, ...delivered)
+        }
+        if (completionSubscription !== undefined && scenario.name === 'subagent-continuable') {
           expect(result.finalResponse, 'run returns at the first parent idle').toBe('DONE')
           expect(result.events.filter(event => event.type === 'turn/end'))
             .toMatchObject([{ data: { turn: 1 } }])

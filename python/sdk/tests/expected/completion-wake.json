@@ -1,0 +1,9 @@
+{
+  "final_response": "runtime smoke ok",
+  "turn_starts": 2,
+  "turn_ends": 2,
+  "inputs": [
+    "FIRST_TASK",
+    "PARENT_QUEUED_TASK"
+  ]
+}
