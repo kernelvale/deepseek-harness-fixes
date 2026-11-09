@@ -102,4 +102,4 @@ The prerequisites and platform build requirements are documented in the [develop
 
 ## Upstream report
 
-The upstream project disables Issues and pull requests and directs bug reports to [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions). The report link and publication status are recorded in [the validation record](validation.json). The existence of this repair repository does not imply upstream acceptance or merge.
+The upstream project disables Issues and pull requests and directs bug reports to [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions). The report is published as [upstream Discussion #12727](https://github.com/deepseek-ai/deepseek-harness/discussions/12727); its publication status is recorded in [the validation record](validation.json). The existence of this repair repository does not imply upstream acceptance or merge.

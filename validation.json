@@ -82,6 +82,12 @@
       "command": "DSH_GATE_CONCURRENCY=2 corepack pnpm run doc-sync",
       "exit_code": 0,
       "checks_passed": 43
+    },
+    {
+      "name": "publication pre-push type checks",
+      "command": "git push (repository pre-push hook: pnpm run typecheck)",
+      "exit_code": 0,
+      "checks_passed": 5
     }
   ],
   "initial_run_note": "The first combined regression started before the native addon build finished and failed with MODULE_NOT_FOUND. Only the subsequent post-build run is counted as passing evidence.",
@@ -95,7 +101,16 @@
   "upstream_feedback": {
     "channel": "GitHub Discussions",
     "reason": "Official README directs bug reports to Discussions; Issues and pull requests are disabled",
-    "status": "prepared; pending publication",
-    "url": null
+    "status": "published",
+    "url": "https://github.com/deepseek-ai/deepseek-harness/discussions/12727",
+    "number": 12727,
+    "category": "General",
+    "author": "kernelvale"
+  },
+  "publication": {
+    "public_repository": true,
+    "default_branch": "main",
+    "credential_mode": "one-shot calls; no saved login",
+    "temporary_transport_key_removed": true
   }
 }

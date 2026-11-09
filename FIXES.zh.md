@@ -102,4 +102,4 @@ corepack pnpm dsh web
 
 ## 上游报告
 
-原仓库关闭了 Issues 和拉取请求，并指定通过 [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions) 提交 bug 报告。反馈链接和发布状态记录在[验证记录](validation.json)中。本修复仓库的存在不代表上游已经接受或合并这些修改。
+原仓库关闭了 Issues 和拉取请求，并指定通过 [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions) 提交 bug 报告。已通过官方入口提交[上游讨论 #12727](https://github.com/deepseek-ai/deepseek-harness/discussions/12727)，发布状态同时记录在[验证记录](validation.json)中。本修复仓库的存在不代表上游已经接受或合并这些修改。
