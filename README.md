@@ -2,6 +2,8 @@
 
 English | [中文](README.zh.md)
 
+This community repair repository combines three fixes for inherited inbox tasks, delegated model selection, and completion wake handoff. See the fix report and verification results in [English](FIXES.md) or [中文](FIXES.zh.md). The upstream project and MIT license remain credited below.
+
 DeepSeek Harness (`dsh`) is an open-source agent harness developed by [DeepSeek AI](https://deepseek.com).
 
 It is built on an **everything-is-a-plugin** architecture and powered by [Cordis](https://github.com/cordiverse/cordis), whose design is described in [_A Programming Paradigm for Spatiotemporal Composability_](https://arxiv.org/abs/2608.25512).
@@ -31,8 +33,8 @@ The command starts the Web UI at `http://127.0.0.1:3080` by default and opens it
 To run from a repository checkout:
 
 ```sh
-git clone https://github.com/deepseek-ai/deepseek-harness.git
-cd deepseek-harness
+git clone https://github.com/kernelvale/deepseek-harness-fixes.git
+cd deepseek-harness-fixes
 pnpm install
 pnpm run build
 pnpm dsh web

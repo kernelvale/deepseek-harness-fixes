@@ -1,0 +1,101 @@
+{
+  "report_date": "2026-11-09",
+  "repository": "https://github.com/kernelvale/deepseek-harness-fixes",
+  "upstream": "https://github.com/deepseek-ai/deepseek-harness",
+  "upstream_version": "0.2.2-rc.1",
+  "upstream_source_commit": "fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159",
+  "environment": {
+    "platform": "Linux x64",
+    "node": "24.22.2",
+    "pnpm": "11.28.5",
+    "python": "3.12",
+    "model_boundary": "scripted adapters, recorded responses, local mocks"
+  },
+  "fixes": [
+    {
+      "id": "inherited-inbox",
+      "original_fix_commit": "932466e987fd62c945192790c8fcba46cee7c68e",
+      "regression_test": "packages/subagent/subagent/tests/fork-inherited-inbox.spec.ts",
+      "trigger": "inherited prefix contains parent input insertion but excludes its later claim",
+      "baseline_negative_control": {
+        "failed": 2
+      }
+    },
+    {
+      "id": "model-selection",
+      "original_fix_commit": "8cbb57341a5402cdc3fc31786cefdd5468e5bdb2",
+      "regression_test": "packages/subagent/subagent/tests/fork-model-selection.spec.ts",
+      "trigger": "fresh seeded child captures a route or effort different from its inherited selection",
+      "baseline_negative_control": {
+        "failed": 3,
+        "passed_controls": 2
+      }
+    },
+    {
+      "id": "completion-wake",
+      "original_fix_commit": "1d2a2f7eab6af39d6374283e922442963e9af6f3",
+      "regression_test": "packages/core/agent-loop/tests/completion-wake.spec.ts",
+      "trigger": "waking input arrives after last empty-inbox check but before idle",
+      "baseline_negative_control": {
+        "failed": 3,
+        "passed_controls": 6,
+        "python": "expected two-turn assertion fails on unmodified CLI"
+      }
+    }
+  ],
+  "combined_validation": [
+    {
+      "name": "full build",
+      "command": "DSH_GATE_CONCURRENCY=2 corepack pnpm run build",
+      "exit_code": 0,
+      "checks_passed": 10
+    },
+    {
+      "name": "related regressions after build",
+      "command": "corepack pnpm exec vitest run --maxWorkers=2 packages/subagent/subagent/tests packages/subagent/subagent-fork-in-process/tests packages/subagent/subagent-spawn-in-process/tests packages/core/agent-loop/tests",
+      "exit_code": 0,
+      "test_files_passed": 58,
+      "tests_passed": 1044
+    },
+    {
+      "name": "headless and TypeScript SDK recordings",
+      "command": "DSH_EXAMPLE_MODE=lib corepack pnpm run test:snapshot snapshots/session/headless.snapshot.ts snapshots/sdk/sdk.snapshot.ts -t 'fork-inherited-inbox|fork-captured-model|completion-wake-handoff|model-switch-notice|subagent-spawn-in-process|subagent-fork-in-process|subagent-parallel|subagent-structured-parent|subagent-agent-preset|text-turn|session-resume|tool-scheduler-recovery|ptc-cancel'",
+      "exit_code": 0,
+      "test_files_passed": 2,
+      "tests_passed": 16,
+      "unselected_tests": 226
+    },
+    {
+      "name": "Python SDK handoff",
+      "command": "PYTHONPATH=python/sdk/src python -m pytest python/sdk/tests/test_completion_wake.py -q",
+      "exit_code": 0,
+      "tests_passed": 1
+    },
+    {
+      "name": "lint",
+      "command": "DSH_OXLINT_THREADS=2 node scripts/run-oxlint.ts .",
+      "exit_code": 0,
+      "notes": "One pre-existing unused-disable warning in experimental/client-ui-cot-translation."
+    },
+    {
+      "name": "documentation",
+      "command": "DSH_GATE_CONCURRENCY=2 corepack pnpm run doc-sync",
+      "exit_code": 0,
+      "checks_passed": 43
+    }
+  ],
+  "initial_run_note": "The first combined regression started before the native addon build finished and failed with MODULE_NOT_FOUND. Only the subsequent post-build run is counted as passing evidence.",
+  "limits": [
+    "No real model API validation",
+    "No Windows or macOS validation",
+    "No installed wheel or single-executable packaging validation",
+    "Related tests are not exhaustive repository-wide coverage",
+    "Historical associations were not established by complete bisection"
+  ],
+  "upstream_feedback": {
+    "channel": "GitHub Discussions",
+    "reason": "Official README directs bug reports to Discussions; Issues and pull requests are disabled",
+    "status": "prepared; pending publication",
+    "url": null
+  }
+}

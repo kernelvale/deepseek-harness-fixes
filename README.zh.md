@@ -2,6 +2,8 @@
 
 [English](README.md) | 中文
 
+本社区修复仓库集中提供继承队列、委派模型选择和结束交接唤醒三个修复，问题场景、修改与验证结果见修复报告的[English](FIXES.md)或[中文版](FIXES.zh.md)。上游项目及 MIT 许可证的署名保留如下。
+
 DeepSeek Harness（`dsh`）是由 [DeepSeek AI](https://deepseek.com) 开发的开源 agent harness（智能体框架）。
 
 它构建于**一切皆插件**的架构之上，由 [Cordis](https://github.com/cordiverse/cordis) 驱动，其设计参见论文 [_A Programming Paradigm for Spatiotemporal Composability_](https://arxiv.org/abs/2608.25512)。
@@ -35,8 +37,8 @@ npx @deepseek-ai/dsh web
 如需从仓库源码运行：
 
 ```sh
-git clone https://github.com/deepseek-ai/deepseek-harness.git
-cd deepseek-harness
+git clone https://github.com/kernelvale/deepseek-harness-fixes.git
+cd deepseek-harness-fixes
 pnpm install
 pnpm run build
 pnpm dsh web
